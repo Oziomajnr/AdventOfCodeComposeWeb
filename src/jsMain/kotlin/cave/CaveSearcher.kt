@@ -26,8 +26,9 @@ class CaveSearcher(private val caves: List<List<Cave>>) {
     }
 
     val lastCave = caves[caves.lastIndex][caves.first().lastIndex]
+    val firstCave = caves[0][0]
 
-    val searchState = mutableStateOf(CaveSearcherData(caves, unVisitedCaves.toSet()))
+    val searchState = mutableStateOf(CaveSearcherData(caves, unVisitedCaves.toMutableSet()))
 
     private fun connectCaves() {
         caves.forEachIndexed { y, list ->
@@ -64,22 +65,29 @@ class CaveSearcher(private val caves: List<List<Cave>>) {
     }
 
     fun step() {
-        if (unVisitedCaves.isNotEmpty() && bestPathTable[lastCave] == null) {
+        if (unVisitedCaves.isNotEmpty()) {
             solvePart1(unVisitedCaves.removeHead())
-            searchState.value = CaveSearcherData(caves, unVisitedCaves.toSet())
+        }
+        if (bestPathTable[lastCave] == null) {
+            searchState.value = CaveSearcherData(caves, unVisitedCaves.toMutableSet())
         } else {
-            println("step in the name of love")
             searchState.value = CaveSearcherData(caves, getCavesInPath(), true)
+
         }
     }
 
     fun getCavesInPath(): MutableSet<Cave> {
         val cavesInPath = mutableSetOf<Cave>()
+        println("step in the name of love")
+        cavesInPath.add(lastCave)
+        bestPathTable.remove(firstCave)
         var x = bestPathTable[lastCave]
-
+        var sum = 0
         while (x != null) {
+            sum += x.second.value
+            println(x.second.value)
             cavesInPath.add(x.second)
-            x = bestPathTable[lastCave]
+            x = bestPathTable[x.second]
         }
         return cavesInPath
     }
